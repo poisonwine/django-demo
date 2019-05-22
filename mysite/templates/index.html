@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Demo App</title>
+</head>
+<body>
+  <div>
+    <textarea
+      id="message"
+      cols="100"
+      rows="10"
+      placeholder="写下你的留言"
+    ></textarea>
+  </div>
+
+  <div>
+    <button id="submit">提交</button>
+  </div>
+
+  <hr>
+
+  <ul id="message-list"></ul>
+
+  <script>
+    function getMessages () {
+      fetch('/api/messages')
+        .then(response => response.json())
+        .then(messages => {
+          const messageList = document.querySelector('#message-list')
+          messageList.innerHTML = ''
+          for (const msg of messages) {
+            const item = document.createElement('li')
+            item.innerText = `${msg.fields.content} - ${msg.fields.created_at}`
+            messageList.appendChild(item)
+          }
+        })
+    }
+      
+    function postMessage () {
+      const message = document.querySelector('#message').value
+      if (!message) {
+        window.alert('内容不能为空')
+        return false
+      }
+      fetch('/api/messages', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+        })
+      }).then(response => {
+        getMessages()
+      })
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      getMessages()
+      const submitBtn = document.querySelector('#submit')
+      submitBtn.addEventListener('click', () => {
+        postMessage()
+      })
+    })
+  </script>
+</body>
+</html>
